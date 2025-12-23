@@ -75,38 +75,57 @@ def generate_query(state: OverallState, config: RunnableConfig) -> QueryGenerati
     return {"search_query": result.query}
 
 
-def continue_to_web_research(state: QueryGenerationState):
+def continue_to_web_research(state: OverallState):
     """LangGraph node that sends the search queries to the web research node."""
+    deep_research = state.get("deep_research", False)
+    reasoning_model = state.get("reasoning_model", "llama3.1")
     return [
-        Send("web_research", {"search_query": search_query, "id": int(idx)})
+        Send("web_research", {
+            "search_query": search_query, 
+            "id": int(idx),
+            "deep_research": deep_research,
+            "reasoning_model": reasoning_model,
+        })
         for idx, search_query in enumerate(state["search_query"])
     ]
 
 
 def web_research(state: WebSearchState, config: RunnableConfig) -> OverallState:
-    """LangGraph node that performs web research using browser automation."""
+    """LangGraph node that performs web research with full page content extraction."""
+    
+    deep_research = state.get("deep_research", False)
+    reasoning_model = state.get("reasoning_model", "llama3.1")
     
     try:
-        # Execute search using real browser (Playwright)
-        print(f"[Browser Search] Searching Google for: {state['search_query']}")
-        results = search_google(state["search_query"], max_results=5, headless=True)
+        # Execute search with full page content extraction
+        mode = "DEEP RESEARCH" if deep_research else "Standard"
+        print(f"[Web Research] [{mode}] Searching for: {state['search_query']}")
+        results = search_google(
+            state["search_query"], 
+            max_results=5, 
+            deep_research=deep_research,
+            model=reasoning_model
+        )
         
-        # Format results into a readable string
+        # Format results with full content when available
         formatted_results = []
         sources = []
         for r in results:
+            # Use full_content if available, otherwise fall back to snippet
+            content = r.get('full_content', r.get('snippet', 'N/A'))
+            
             formatted_results.append(
                 f"Title: {r.get('title', 'N/A')}\n"
                 f"URL: {r.get('url', 'N/A')}\n"
-                f"Snippet: {r.get('snippet', 'N/A')}"
+                f"Content: {content}"
             )
             if r.get('url'):
                 sources.append({"url": r.get('url'), "title": r.get('title', '')})
         
-        search_results = "\n\n".join(formatted_results) if formatted_results else "No results found."
-        print(f"[Browser Search] Found {len(results)} results")
+        search_results = "\n\n---\n\n".join(formatted_results) if formatted_results else "No results found."
+        print(f"[Web Research] Found {len(results)} results with content")
     except Exception as e:
-        print(f"[Browser Search] Error: {str(e)}")
+        print(f"[Web Research] Error: {str(e)}")
         search_results = f"Search failed: {str(e)}. Please try again."
         sources = []
     

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { SquarePen, Brain, Send, StopCircle, Zap, Cpu } from "lucide-react";
+import { SquarePen, Brain, Send, StopCircle, Zap, Cpu, Microscope } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -10,9 +10,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Updated InputFormProps
+// Updated InputFormProps with deepResearch
 interface InputFormProps {
-  onSubmit: (inputValue: string, effort: string, model: string) => void;
+  onSubmit: (inputValue: string, effort: string, model: string, deepResearch: boolean) => void;
   onCancel: () => void;
   isLoading: boolean;
   hasHistory: boolean;
@@ -27,11 +27,12 @@ export const InputForm: React.FC<InputFormProps> = ({
   const [internalInputValue, setInternalInputValue] = useState("");
   const [effort, setEffort] = useState("medium");
   const [model, setModel] = useState("llama3.1");
+  const [deepResearch, setDeepResearch] = useState(false);
 
   const handleInternalSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!internalInputValue.trim()) return;
-    onSubmit(internalInputValue, effort, model);
+    onSubmit(internalInputValue, effort, model, deepResearch);
     setInternalInputValue("");
   };
 
@@ -152,6 +153,20 @@ export const InputForm: React.FC<InputFormProps> = ({
               </SelectContent>
             </Select>
           </div>
+          {/* Deep Research Toggle */}
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => setDeepResearch(!deepResearch)}
+            className={`flex flex-row gap-2 rounded-xl rounded-t-sm px-3 py-2 cursor-pointer transition-all duration-200 ${deepResearch
+                ? "bg-purple-600 text-white hover:bg-purple-700"
+                : "bg-neutral-700 text-neutral-300 hover:bg-neutral-600"
+              }`}
+            title={deepResearch ? "Deep Research ON: Uses browser-use for thorough content extraction (slower)" : "Click to enable Deep Research mode"}
+          >
+            <Microscope className={`h-4 w-4 ${deepResearch ? "text-white" : "text-purple-400"}`} />
+            <span className="text-sm">Deep</span>
+          </Button>
         </div>
         {hasHistory && (
           <Button

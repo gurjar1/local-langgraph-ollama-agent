@@ -19,6 +19,7 @@ class OverallState(TypedDict):
     max_research_loops: int
     research_loop_count: int
     reasoning_model: str
+    deep_research: bool  # If True, use browser-use for thorough content extraction
 
 
 class ReflectionState(TypedDict):
@@ -41,6 +42,8 @@ class QueryGenerationState(TypedDict):
 class WebSearchState(TypedDict):
     search_query: str
     id: str
+    deep_research: bool
+    reasoning_model: str
 
 
 @dataclass(kw_only=True)
