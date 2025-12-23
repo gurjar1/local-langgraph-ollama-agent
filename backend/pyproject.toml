@@ -18,6 +18,11 @@ dependencies = [
     "langgraph-api",
     "fastapi",
     "google-genai",
+    "langchain-ollama",
+    "langchain-community",
+    "duckduckgo-search<7.0.0",
+    "browser-use",
+    "playwright",
 ]
 
 

@@ -1,0 +1,16 @@
+use_default_settings: true
+
+general:
+  instance_name: "SearXNG Local"
+
+server:
+  secret_key: "mysupersecretkey123456789012345678901234567890"
+  limiter: false
+  image_proxy: false
+  public_instance: false
+
+search:
+  safe_search: 0
+  formats:
+    - html
+    - json
